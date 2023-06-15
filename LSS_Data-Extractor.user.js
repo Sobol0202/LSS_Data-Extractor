@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Leitstellenspiel Data Extraktor
 // @namespace    https://www.leitstellenspiel.de
-// @version      1.0
+// @version      1.0.1
 // @description  Fügt einen Button ein um verschiedene Daten aus dem LSS zu sammeln und in die Zwischenablage zu nehmen.
 // @match        https://www.leitstellenspiel.de/credits/daily
 // @author       MissSobol
@@ -177,21 +177,44 @@
     }
   }
 
-  // Funktion zum Erstellen des Feldes zum Kopieren in die Zwischenablage
-  function createCopyField() {
-    var copyField = document.createElement("div");
-    copyField.innerHTML = "Daten in Zwischenablage nehmen";
-    copyField.style.cursor = "pointer";
-    copyField.style.marginTop = "10px";
-    copyField.style.color = "blue";
-    copyField.addEventListener("click", copyToClipboard);
+// Funktion zum Erstellen des Feldes zum Kopieren in die Zwischenablage und zum direkten Download
+function createCopyField() {
+  var copyField = document.createElement("div");
+  copyField.style.marginTop = "10px";
 
-    var container = document.getElementById("iframe-inside-container");
-    if (container) {
-      container.appendChild(copyField);
-    }
+  var copyButton = document.createElement("button");
+  copyButton.innerHTML = "Daten in Zwischenablage kopieren";
+  copyButton.style.marginRight = "10px";
+  copyButton.addEventListener("click", copyToClipboard);
+  copyField.appendChild(copyButton);
+
+  var downloadButton = document.createElement("a");
+  downloadButton.innerHTML = "Daten als CSV herunterladen";
+  downloadButton.style.color = "blue";
+  downloadButton.style.cursor = "pointer";
+  downloadButton.addEventListener("click", downloadCSV);
+  copyField.appendChild(downloadButton);
+
+  var container = document.getElementById("iframe-inside-container");
+  if (container) {
+    container.appendChild(copyField);
   }
+}
 
+    // Funktion zum Herunterladen des Datensatzes als CSV-Datei
+function downloadCSV() {
+  var data = localStorage.getItem("data");
+  if (data) {
+    var csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(data);
+    var downloadLink = document.createElement("a");
+    downloadLink.setAttribute("href", csvContent);
+    downloadLink.setAttribute("download", "datensatz.csv");
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  }
+}
   addButton();
   createCopyField();
 })();
